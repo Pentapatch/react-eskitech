@@ -11,15 +11,15 @@ import { Product } from "@root/models/products/product";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-interface ProductDialogProps {
+interface ProductInfoDialogProps {
   productId: number | null;
   setProductId: (productId: number | null) => void;
 }
 
-export const ProductDialog = ({
+export const ProductInfoDialog = ({
   productId,
   setProductId,
-}: ProductDialogProps) => {
+}: ProductInfoDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
@@ -29,7 +29,7 @@ export const ProductDialog = ({
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProduct = async () => {
       try {
         const response = await axios.get(
           `https://localhost:7007/api/Products/${productId}`
@@ -44,7 +44,7 @@ export const ProductDialog = ({
     if (productId) {
       setLoading(true);
       setOpen(true);
-      fetchProducts();
+      fetchProduct();
     } else {
       setOpen(false);
     }

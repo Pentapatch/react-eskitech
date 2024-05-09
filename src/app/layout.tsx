@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className}`}>
         <Header />
-        <div className="mt-44 w-full px-2 sm:px-0 sm:w-3/4 sm:mx-auto">
+        <div className="mt-44 w-full px-2 sm:px-0 sm:w-3/4 sm:mx-auto contain-content">
           {children}
         </div>
       </body>

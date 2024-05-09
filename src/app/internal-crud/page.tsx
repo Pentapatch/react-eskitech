@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductInfoDialog } from "@root/components/product-info-dialog/product-info-dialog";
+import { ProductCrudDialog } from "@root/components/product-crud-dialog/product-crud-dialog";
 import { ProductList } from "@root/components/product-list/product-list";
 import { useState } from "react";
 
@@ -11,16 +11,13 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-between">
-      <p>
-        Den här sidan demonstrerar hur företag kan samarbeta med Eskitech genom
-        att tillåtas hämta produktdata från Eskitechs databas genom ett API.
-      </p>
       <p className="pb-4">
-        Partnern kan endast hämta data och inte skapa, uppdatera eller radera
-        data.
+        Den här sidan demonstrerar hur Eskitech skulle kunna nyttja APIet för
+        att skriva en intern CRUD-applikation som kan hämta, skapa, uppdatera
+        och radera produkter från databasen.
       </p>
       <ProductList onProductSelected={setSelectedProductId} />
-      <ProductInfoDialog
+      <ProductCrudDialog
         productId={selectedProductId}
         setProductId={setSelectedProductId}
       />
