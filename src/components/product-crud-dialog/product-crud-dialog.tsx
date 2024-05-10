@@ -1,4 +1,4 @@
-import { ExpandMore } from "@mui/icons-material";
+import { Close, Delete, ExpandMore, Save } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -12,22 +12,30 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { deleteProduct, getProduct, updateProduct } from "@root/api/api";
+import {
+  createProduct,
+  deleteProduct,
+  getProduct,
+  updateProduct,
+} from "@root/api/api";
 import { Product } from "@root/models/products/product";
+import { ProductPost } from "@root/models/products/product-post";
 import { ProductPut } from "@root/models/products/product-put";
 import { useEffect, useState } from "react";
 
 interface ProductCrudDialogProps {
-  productId: number | null;
+  productId: number | null | undefined;
   setProductId: (productId: number | null) => void;
+  onRefresh?: () => void;
 }
 
 export const ProductCrudDialog = ({
   productId,
   setProductId,
+  onRefresh,
 }: ProductCrudDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [editedProduct, setEditedProduct] = useState<ProductPut | null>(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
@@ -39,8 +47,11 @@ export const ProductCrudDialog = ({
   };
 
   useEffect(() => {
-    if (!productId) {
+    if (productId === null) {
       setOpen(false);
+      return;
+    } else if (productId === undefined) {
+      setOpen(true);
       return;
     }
 
@@ -99,6 +110,7 @@ export const ProductCrudDialog = ({
         .finally(() => {
           setDeleteInProgress(false);
         });
+      if (onRefresh) onRefresh();
     }
   };
 
@@ -115,7 +127,25 @@ export const ProductCrudDialog = ({
         .finally(() => {
           setSubmitInProgress(false);
         });
+    } else {
+      setSubmitInProgress(true);
+      // TODO: Set the categoryId when categories is implemented
+      const newProduct: ProductPost = {
+        ...(editedProduct as ProductPost),
+        categoryId: 1,
+      };
+      createProduct(newProduct)
+        .then(() => {
+          setOpen(false);
+        })
+        .catch((error) => {
+          console.error("Error creating product:", error);
+        })
+        .finally(() => {
+          setSubmitInProgress(false);
+        });
     }
+    if (onRefresh) onRefresh();
   };
 
   const requestInProgress = submitInProgress || deleteInProgress;
@@ -141,51 +171,51 @@ export const ProductCrudDialog = ({
                 <CircularProgress />
                 Laddar produkt...
               </div>
-            ))}
+            )) ||
+            "Skapa ny produkt"}
         </div>
       </DialogTitle>
       <DialogContent>
-        {editedProduct && (
-          <div className="mt-2 flex flex-col gap-4">
-            <TextField
-              label="Produktnamn"
-              id="product-name"
-              name="name"
-              value={editedProduct.name}
-              onChange={handleInputChange}
-              disabled={requestInProgress}
-              fullWidth
-            />
-            <TextField
-              label="Produkt ID"
-              id="product-id"
-              name="productId"
-              value={editedProduct.productId}
-              onChange={handleInputChange}
-              disabled={requestInProgress}
-              fullWidth
-            />
-            <TextField
-              label="Beskrivning"
-              id="product-description"
-              name="description"
-              value={editedProduct.description}
-              onChange={handleInputChange}
-              disabled={requestInProgress}
-              multiline
-              fullWidth
-            />
-            <TextField
-              label="Märke"
-              id="product-brand"
-              name="brand"
-              value={editedProduct.brand}
-              onChange={handleInputChange}
-              disabled={requestInProgress}
-              fullWidth
-            />
-            {/* TODO: Implement when I have endpoints for gettings all categories */}
-            {/* <FormControl fullWidth>
+        <div className="mt-2 flex flex-col gap-4">
+          <TextField
+            label="Produktnamn"
+            id="product-name"
+            name="name"
+            value={editedProduct?.name || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            fullWidth
+          />
+          <TextField
+            label="Produkt ID"
+            id="product-id"
+            name="productId"
+            value={editedProduct?.productId || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            fullWidth
+          />
+          <TextField
+            label="Beskrivning"
+            id="product-description"
+            name="description"
+            value={editedProduct?.description || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            multiline
+            fullWidth
+          />
+          <TextField
+            label="Märke"
+            id="product-brand"
+            name="brand"
+            value={editedProduct?.brand || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            fullWidth
+          />
+          {/* TODO: Implement when I have endpoints for gettings all categories */}
+          {/* <FormControl fullWidth>
               <InputLabel id="category-label">Kategori</InputLabel>
               <Select
                 label="Kategori"
@@ -201,24 +231,25 @@ export const ProductCrudDialog = ({
                 <MenuItem value={30}>Thirty</MenuItem>
               </Select>
             </FormControl> */}
-            <TextField
-              label="Pris"
-              id="product-price"
-              name="price"
-              value={editedProduct.price}
-              onChange={handleInputChange}
-              disabled={requestInProgress}
-              fullWidth
-            />
-            <TextField
-              label="Lagersaldo"
-              id="product-stock-quantity"
-              name="stockQuantity"
-              value={editedProduct.stockQuantity}
-              onChange={handleInputChange}
-              disabled={requestInProgress}
-              fullWidth
-            />
+          <TextField
+            label="Pris"
+            id="product-price"
+            name="price"
+            value={editedProduct?.price || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            fullWidth
+          />
+          <TextField
+            label="Lagersaldo"
+            id="product-stock-quantity"
+            name="stockQuantity"
+            value={editedProduct?.stockQuantity || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            fullWidth
+          />
+          {product && (
             <Accordion
               expanded={expanded}
               onChange={(_, expanded) => setExpanded(expanded)}
@@ -230,7 +261,7 @@ export const ProductCrudDialog = ({
                 <div className="flex flex-col gap-4">
                   <TextField
                     label="Databas ID"
-                    value={product?.id}
+                    value={product?.id || ""}
                     fullWidth
                     disabled
                   />
@@ -249,8 +280,8 @@ export const ProductCrudDialog = ({
                 </div>
               </AccordionDetails>
             </Accordion>
-          </div>
-        )}
+          )}
+        </div>
       </DialogContent>
       {!loading && (
         <DialogActions>
@@ -258,29 +289,34 @@ export const ProductCrudDialog = ({
             variant="outlined"
             onClick={handleClose}
             disabled={requestInProgress}
+            startIcon={<Close />}
           >
             Avbryt
           </Button>
-          <Button
-            variant="outlined"
-            color="warning"
-            onClick={handleDelete}
-            disabled={requestInProgress}
-          >
-            <div className="flex items-center gap-4">
-              {deleteInProgress && <CircularProgress size={24} />}
-              Radera
-            </div>
-          </Button>
+          {product && (
+            <Button
+              variant="outlined"
+              color="warning"
+              onClick={handleDelete}
+              disabled={requestInProgress}
+              startIcon={<Delete />}
+            >
+              <div className="flex items-center gap-4">
+                {deleteInProgress && <CircularProgress size={24} />}
+                Radera
+              </div>
+            </Button>
+          )}
           <Button
             variant="contained"
             color="primary"
             type="submit"
             disabled={requestInProgress}
+            startIcon={<Save />}
           >
             <div className="flex items-center gap-4">
               {submitInProgress && <CircularProgress size={24} />}
-              Spara
+              {product ? "Spara ändringar" : "Skapa produkt"}
             </div>
           </Button>
         </DialogActions>

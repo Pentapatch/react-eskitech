@@ -6,24 +6,31 @@ import { ProductList } from "@root/components/product-list/product-list";
 import { useState } from "react";
 
 export default function Home() {
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null
-  );
+  const [selectedProductId, setSelectedProductId] = useState<
+    number | null | undefined
+  >(null);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   return (
     <main className="flex flex-col items-center justify-between">
       <Typography variant="h4" gutterBottom>
-        Intern CRUD
+        CRUD Applikation
       </Typography>
       <Typography>
         Den här sidan demonstrerar hur Eskitech skulle kunna nyttja APIet för
         att skriva en intern CRUD-applikation som kan hämta, skapa, uppdatera
         och radera produkter från databasen.
       </Typography>
-      <ProductList onProductSelected={setSelectedProductId} />
+      <ProductList
+        onProductSelected={setSelectedProductId}
+        onCreateProduct={() => setSelectedProductId(undefined)}
+        crud
+        refresh={refresh}
+      />
       <ProductCrudDialog
         productId={selectedProductId}
         setProductId={setSelectedProductId}
+        onRefresh={() => setRefresh((prev) => !prev)}
       />
     </main>
   );

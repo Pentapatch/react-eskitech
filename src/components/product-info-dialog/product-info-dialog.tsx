@@ -1,3 +1,4 @@
+import { Close } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -72,7 +73,9 @@ export const ProductInfoDialog = ({
                 Laddar produkt...
               </div>
             ))}
-          <Button onClick={handleClose}>Stäng</Button>
+          <Button onClick={handleClose} startIcon={<Close />}>
+            Stäng
+          </Button>
         </div>
       </DialogTitle>
       {product && (

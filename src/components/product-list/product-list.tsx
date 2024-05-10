@@ -1,7 +1,9 @@
 "use client";
 
+import { Add, Delete, Update } from "@mui/icons-material";
 import {
   Autocomplete,
+  Button,
   CircularProgress,
   FormControlLabel,
   Paper,
@@ -14,21 +16,30 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { getProducts } from "@root/api/api";
+import { deleteProduct, getProducts } from "@root/api/api";
 import { Products } from "@root/models/products/products";
 import { useEffect, useState } from "react";
 
 interface ProductListProps {
+  crud?: boolean;
+  refresh?: boolean;
   onProductSelected: (productId: number | null) => void;
+  onCreateProduct?: () => void;
 }
 
-export const ProductList = ({ onProductSelected }: ProductListProps) => {
+export const ProductList = ({
+  crud,
+  refresh,
+  onProductSelected,
+  onCreateProduct,
+}: ProductListProps) => {
   const [products, setProducts] = useState<Products[]>([]);
   const [jsonResponse, setJsonResponse] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [showRawData, setShowRawData] = useState<boolean>(false);
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
 
-  useEffect(() => {
+  const fetchProducts = async () => {
     getProducts()
       .then((data) => {
         setProducts(data);
@@ -39,10 +50,30 @@ export const ProductList = ({ onProductSelected }: ProductListProps) => {
         // TODO: Display generic error message to user via a toast or similar
         console.error("Error fetching products:", error);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [refresh]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowRawData(event.target.checked);
+  };
+
+  const handleCreateProduct = () => {
+    if (onCreateProduct) onCreateProduct();
+  };
+
+  const handleDelete = async (productId: number) => {
+    setDeleteInProgress(true);
+    deleteProduct(productId)
+      .catch((error) => {
+        console.error("Error deleting product:", error);
+      })
+      .finally(() => {
+        setDeleteInProgress(false);
+        fetchProducts();
+      });
   };
 
   const autocompleteOptions = products.map((product) => ({
@@ -60,7 +91,7 @@ export const ProductList = ({ onProductSelected }: ProductListProps) => {
 
   return (
     <div className="w-full my-4">
-      <div className="sticky top-[128px] h-20 bg-blue-50 flex items-center justify-between">
+      <div className="sticky top-[128px] h-20 px-2 bg-blue-50 flex items-center justify-between">
         <h1 className="pl-2 font-bold text-2xl">Eskitech&apos;s produkter</h1>
         <Autocomplete
           disablePortal
@@ -74,10 +105,28 @@ export const ProductList = ({ onProductSelected }: ProductListProps) => {
             onProductSelected(selectedOption?.id || null);
           }}
         />
-        <FormControlLabel
-          control={<Switch checked={showRawData} onChange={handleChange} />}
-          label="Visa rå data"
-        />
+        <div className="flex gap-4">
+          <Button
+            variant="outlined"
+            onClick={fetchProducts}
+            startIcon={<Update />}
+          >
+            Uppdatera
+          </Button>
+          {crud && (
+            <Button
+              variant="contained"
+              onClick={handleCreateProduct}
+              startIcon={<Add />}
+            >
+              Skapa ny produkt
+            </Button>
+          )}
+          <FormControlLabel
+            control={<Switch checked={showRawData} onChange={handleChange} />}
+            label="Visa rå data"
+          />
+        </div>
       </div>
       {(showRawData && (
         <pre className="py-2 text-xs sm:text-sm overflow-auto">
@@ -94,6 +143,7 @@ export const ProductList = ({ onProductSelected }: ProductListProps) => {
                 <TableCell align="left">Kategori</TableCell>
                 <TableCell align="left">Pris</TableCell>
                 <TableCell align="left">Lagersaldo</TableCell>
+                {crud && <TableCell align="left">Åtgärder</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -115,8 +165,18 @@ export const ProductList = ({ onProductSelected }: ProductListProps) => {
                   <TableCell align="left">
                     {product.category.displayName}
                   </TableCell>
-                  <TableCell align="left">{product.price}</TableCell>
-                  <TableCell align="left">{product.stockQuantity}</TableCell>
+                  <TableCell align="right">{product.price}</TableCell>
+                  <TableCell align="right">{product.stockQuantity}</TableCell>
+                  {crud && (
+                    <TableCell align="right">
+                      <Button
+                        color="warning"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        <Delete />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
