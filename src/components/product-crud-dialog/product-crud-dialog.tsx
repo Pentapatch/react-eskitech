@@ -206,7 +206,7 @@ export const ProductCrudDialog = ({
             fullWidth
           />
           <TextField
-            label="Märke"
+            label="Tillverkare"
             id="product-brand"
             name="brand"
             value={editedProduct?.brand || ""}
@@ -236,6 +236,7 @@ export const ProductCrudDialog = ({
             id="product-price"
             name="price"
             value={editedProduct?.price || ""}
+            type="number"
             onChange={handleInputChange}
             disabled={requestInProgress}
             fullWidth
@@ -244,6 +245,7 @@ export const ProductCrudDialog = ({
             label="Lagersaldo"
             id="product-stock-quantity"
             name="stockQuantity"
+            type="number"
             value={editedProduct?.stockQuantity || ""}
             onChange={handleInputChange}
             disabled={requestInProgress}

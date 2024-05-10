@@ -96,7 +96,7 @@ export const ProductInfoDialog = ({
             />
           </ListItem>
           <ListItem>
-            <ListItemText primary="Märke" secondary={product.brand} />
+            <ListItemText primary="Tillverkare" secondary={product.brand} />
           </ListItem>
           <ListItem>
             <ListItemText

@@ -19,7 +19,7 @@ export default function Home() {
         Den här sidan demonstrerar hur företag kan samarbeta med Eskitech genom
         att tillåtas hämta produktdata från Eskitechs databas genom ett API.
       </Typography>
-      <Typography>
+      <Typography className="mb-4">
         Partnern kan endast hämta data och inte skapa, uppdatera eller radera
         data.
       </Typography>

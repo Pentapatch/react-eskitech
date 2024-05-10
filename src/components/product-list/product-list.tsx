@@ -106,6 +106,10 @@ export const ProductList = ({
           }}
         />
         <div className="flex gap-4">
+          <FormControlLabel
+            control={<Switch checked={showRawData} onChange={handleChange} />}
+            label="Visa rå data"
+          />
           <Button
             variant="outlined"
             onClick={fetchProducts}
@@ -122,10 +126,6 @@ export const ProductList = ({
               Skapa ny produkt
             </Button>
           )}
-          <FormControlLabel
-            control={<Switch checked={showRawData} onChange={handleChange} />}
-            label="Visa rå data"
-          />
         </div>
       </div>
       {(showRawData && (

@@ -16,7 +16,7 @@ export default function Home() {
       <Typography variant="h4" gutterBottom>
         CRUD Applikation
       </Typography>
-      <Typography>
+      <Typography className="mb-4">
         Den här sidan demonstrerar hur Eskitech skulle kunna nyttja APIet för
         att skriva en intern CRUD-applikation som kan hämta, skapa, uppdatera
         och radera produkter från databasen.
