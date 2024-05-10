@@ -1,4 +1,8 @@
+import { ExpandMore } from "@mui/icons-material";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   CircularProgress,
   Dialog,
@@ -6,10 +10,11 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from "@mui/material";
+import { deleteProduct, getProduct, updateProduct } from "@root/api/api";
 import { Product } from "@root/models/products/product";
 import { ProductPut } from "@root/models/products/product-put";
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 interface ProductCrudDialogProps {
@@ -27,35 +32,37 @@ export const ProductCrudDialog = ({
   const [editedProduct, setEditedProduct] = useState<ProductPut | null>(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const handleClose = () => {
     setOpen(false);
   };
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(
-          `https://localhost:7007/api/Products/${productId}`
-        );
-        setProduct(response.data);
-        setEditedProduct({
-          ...response.data,
-          categoryId: response.data.category.id,
-        });
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching product:", error);
-      }
-    };
-
-    if (productId) {
-      setLoading(true);
-      setOpen(true);
-      fetchProduct();
-    } else {
+    if (!productId) {
       setOpen(false);
+      return;
     }
+
+    setLoading(true);
+    setOpen(true);
+
+    getProduct(productId)
+      .then((data) => {
+        setProduct(data);
+        setEditedProduct({
+          ...data,
+          categoryId: data.category.id,
+        });
+      })
+      .catch((error) => {
+        // TODO: Display generic error message to user via a toast or similar
+        console.error("Error fetching product:", error);
+        setOpen(false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [productId]);
 
   useEffect(() => {
@@ -82,29 +89,32 @@ export const ProductCrudDialog = ({
   const handleDelete = async () => {
     if (product) {
       setDeleteInProgress(true);
-      try {
-        await axios.delete(`https://localhost:7007/api/Products/${product.id}`);
-        setOpen(false);
-      } catch (error) {
-        console.error("Error deleting product:", error);
-      }
-      setDeleteInProgress(false);
+      deleteProduct(product.id)
+        .then(() => {
+          setOpen(false);
+        })
+        .catch((error) => {
+          console.error("Error deleting product:", error);
+        })
+        .finally(() => {
+          setDeleteInProgress(false);
+        });
     }
   };
 
   const handleSubmit = async () => {
     if (product && editedProduct) {
       setSubmitInProgress(true);
-      try {
-        await axios.put(
-          `https://localhost:7007/api/Products/${product.id}`,
-          editedProduct
-        );
-        setOpen(false);
-      } catch (error) {
-        console.error("Error updating product:", error);
-      }
-      setSubmitInProgress(false);
+      updateProduct(product.id, editedProduct)
+        .then(() => {
+          setOpen(false);
+        })
+        .catch((error) => {
+          console.error("Error updating product:", error);
+        })
+        .finally(() => {
+          setSubmitInProgress(false);
+        });
     }
   };
 
@@ -146,15 +156,6 @@ export const ProductCrudDialog = ({
               disabled={requestInProgress}
               fullWidth
             />
-            {product && (
-              <TextField
-                label="Databas ID"
-                value={product.id}
-                onChange={handleInputChange}
-                fullWidth
-                disabled
-              />
-            )}
             <TextField
               label="Produkt ID"
               id="product-id"
@@ -218,22 +219,36 @@ export const ProductCrudDialog = ({
               disabled={requestInProgress}
               fullWidth
             />
-            {product && (
-              <>
-                <TextField
-                  label="Skapad datum"
-                  value={getDate(product.createdAt)}
-                  fullWidth
-                  disabled
-                />
-                <TextField
-                  label="Uppdaterad datum"
-                  value={getDate(product.updatedAt)}
-                  fullWidth
-                  disabled
-                />
-              </>
-            )}
+            <Accordion
+              expanded={expanded}
+              onChange={(_, expanded) => setExpanded(expanded)}
+            >
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Typography>Låsta fält</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <div className="flex flex-col gap-4">
+                  <TextField
+                    label="Databas ID"
+                    value={product?.id}
+                    fullWidth
+                    disabled
+                  />
+                  <TextField
+                    label="Skapad datum"
+                    value={getDate(product?.createdAt)}
+                    fullWidth
+                    disabled
+                  />
+                  <TextField
+                    label="Uppdaterad datum"
+                    value={getDate(product?.updatedAt)}
+                    fullWidth
+                    disabled
+                  />
+                </div>
+              </AccordionDetails>
+            </Accordion>
           </div>
         )}
       </DialogContent>

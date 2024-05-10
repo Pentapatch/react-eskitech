@@ -7,8 +7,8 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
+import { getProduct } from "@root/api/api";
 import { Product } from "@root/models/products/product";
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 interface ProductInfoDialogProps {
@@ -29,25 +29,26 @@ export const ProductInfoDialog = ({
   };
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(
-          `https://localhost:7007/api/Products/${productId}`
-        );
-        setProduct(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching product:", error);
-      }
-    };
-
-    if (productId) {
-      setLoading(true);
-      setOpen(true);
-      fetchProduct();
-    } else {
+    if (!productId) {
       setOpen(false);
+      return;
     }
+
+    setLoading(true);
+    setOpen(true);
+
+    getProduct(productId)
+      .then((data) => {
+        setProduct(data);
+      })
+      .catch((error) => {
+        // TODO: Display generic error message to user via a toast or similar
+        console.error("Error fetching product:", error);
+        setOpen(false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [productId]);
 
   useEffect(() => {

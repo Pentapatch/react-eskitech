@@ -1,5 +1,6 @@
 "use client";
 
+import { Typography } from "@mui/material";
 import { ProductInfoDialog } from "@root/components/product-info-dialog/product-info-dialog";
 import { ProductList } from "@root/components/product-list/product-list";
 import { useState } from "react";
@@ -11,14 +12,17 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-between">
-      <p>
+      <Typography variant="h4" gutterBottom>
+        Externt API
+      </Typography>
+      <Typography>
         Den här sidan demonstrerar hur företag kan samarbeta med Eskitech genom
         att tillåtas hämta produktdata från Eskitechs databas genom ett API.
-      </p>
-      <p className="pb-4">
+      </Typography>
+      <Typography>
         Partnern kan endast hämta data och inte skapa, uppdatera eller radera
         data.
-      </p>
+      </Typography>
       <ProductList onProductSelected={setSelectedProductId} />
       <ProductInfoDialog
         productId={selectedProductId}

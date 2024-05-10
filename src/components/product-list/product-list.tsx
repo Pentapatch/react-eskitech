@@ -14,37 +14,31 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import { getProducts } from "@root/api/api";
 import { Products } from "@root/models/products/products";
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 interface ProductListProps {
   onProductSelected: (productId: number | null) => void;
-  onRefresh?: () => void;
 }
 
-export const ProductList = ({
-  onProductSelected,
-  onRefresh,
-}: ProductListProps) => {
+export const ProductList = ({ onProductSelected }: ProductListProps) => {
   const [products, setProducts] = useState<Products[]>([]);
   const [jsonResponse, setJsonResponse] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [showRawData, setShowRawData] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("https://localhost:7007/api/Products");
-        setProducts(response.data);
-        setJsonResponse(JSON.stringify(response.data, null, 2));
+    getProducts()
+      .then((data) => {
+        setProducts(data);
+        setJsonResponse(JSON.stringify(data, null, 2));
         setLoading(false);
-      } catch (error) {
+      })
+      .catch((error) => {
+        // TODO: Display generic error message to user via a toast or similar
         console.error("Error fetching products:", error);
-      }
-    };
-
-    fetchProducts();
+      });
   }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,12 +51,16 @@ export const ProductList = ({
   }));
 
   if (loading) {
-    return <CircularProgress />;
+    return (
+      <div className="mt-6">
+        <CircularProgress size={48} />
+      </div>
+    );
   }
 
   return (
-    <div className="w-full">
-      <div className="sticky top-[128px] h-20 bg-gray-100 flex items-center justify-between">
+    <div className="w-full my-4">
+      <div className="sticky top-[128px] h-20 bg-blue-50 flex items-center justify-between">
         <h1 className="pl-2 font-bold text-2xl">Eskitech&apos;s produkter</h1>
         <Autocomplete
           disablePortal
@@ -99,10 +97,13 @@ export const ProductList = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.map((product) => (
+              {products.map((product, index) => (
                 <TableRow
                   key={product.name}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  sx={{
+                    "&:last-child td, &:last-child th": { border: 0 },
+                    backgroundColor: index % 2 === 0 ? "#f2f2f2" : "inherit",
+                  }}
                 >
                   <TableCell component="th" scope="row">
                     <a href="#" onClick={() => onProductSelected(product.id)}>
