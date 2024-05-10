@@ -3,6 +3,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Autocomplete,
   Button,
   CircularProgress,
   Dialog,
@@ -15,9 +16,11 @@ import {
 import {
   createProduct,
   deleteProduct,
+  getCategories,
   getProduct,
   updateProduct,
 } from "@root/api/api";
+import { Categories } from "@root/models/categories/categories";
 import { Product } from "@root/models/products/product";
 import { ProductPost } from "@root/models/products/product-post";
 import { ProductPut } from "@root/models/products/product-put";
@@ -37,10 +40,13 @@ export const ProductCrudDialog = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
-  const [editedProduct, setEditedProduct] = useState<ProductPut | null>(null);
+  const [editedProduct, setEditedProduct] = useState<
+    ProductPut | ProductPost | null
+  >(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [categories, setCategories] = useState<Categories[]>([]);
 
   const handleClose = () => {
     setOpen(false);
@@ -52,6 +58,7 @@ export const ProductCrudDialog = ({
       return;
     } else if (productId === undefined) {
       setOpen(true);
+      setEditedProduct({} as ProductPost);
       return;
     }
 
@@ -74,6 +81,14 @@ export const ProductCrudDialog = ({
       .finally(() => {
         setLoading(false);
       });
+
+    getCategories()
+      .then((data) => {
+        setCategories(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+      });
   }, [productId]);
 
   useEffect(() => {
@@ -92,8 +107,18 @@ export const ProductCrudDialog = ({
   ) => {
     const { name, value } = e.target;
     setEditedProduct((prevState) => ({
-      ...(prevState as ProductPut),
+      ...(prevState as ProductPut | ProductPost),
       [name]: value,
+    }));
+  };
+
+  const handleCategoryChange = (
+    selectedOption: { label: string; id: number } | null
+  ) => {
+    if (!selectedOption) return;
+    setEditedProduct((prevState) => ({
+      ...(prevState as ProductPut | ProductPost),
+      categoryId: selectedOption.id,
     }));
   };
 
@@ -109,8 +134,8 @@ export const ProductCrudDialog = ({
         })
         .finally(() => {
           setDeleteInProgress(false);
+          if (onRefresh) onRefresh();
         });
-      if (onRefresh) onRefresh();
     }
   };
 
@@ -126,15 +151,11 @@ export const ProductCrudDialog = ({
         })
         .finally(() => {
           setSubmitInProgress(false);
+          if (onRefresh) onRefresh();
         });
-    } else {
+    } else if (editedProduct) {
       setSubmitInProgress(true);
-      // TODO: Set the categoryId when categories is implemented
-      const newProduct: ProductPost = {
-        ...(editedProduct as ProductPost),
-        categoryId: 1,
-      };
-      createProduct(newProduct)
+      createProduct(editedProduct)
         .then(() => {
           setOpen(false);
         })
@@ -143,10 +164,15 @@ export const ProductCrudDialog = ({
         })
         .finally(() => {
           setSubmitInProgress(false);
+          if (onRefresh) onRefresh();
         });
     }
-    if (onRefresh) onRefresh();
   };
+
+  const autocompleteOptions = categories.map((category) => ({
+    label: category.name,
+    id: category.id,
+  }));
 
   const requestInProgress = submitInProgress || deleteInProgress;
 
@@ -214,23 +240,20 @@ export const ProductCrudDialog = ({
             disabled={requestInProgress}
             fullWidth
           />
-          {/* TODO: Implement when I have endpoints for gettings all categories */}
-          {/* <FormControl fullWidth>
-              <InputLabel id="category-label">Kategori</InputLabel>
-              <Select
-                label="Kategori"
-                id="product-category-id"
-                name="categoryId"
-                labelId="category-label"
-                value={product.category.displayName}
-                fullWidth
-                onChange={() => {}}
-              >
-                <MenuItem value={"Cyckling"}>Cyckling</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
-            </FormControl> */}
+          <Autocomplete
+            disablePortal
+            options={autocompleteOptions}
+            renderInput={(params) => <TextField {...params} label="Kategori" />}
+            noOptionsText="Inga matchande kategorier hittades"
+            value={
+              autocompleteOptions.find(
+                (x) => x.id === editedProduct?.categoryId
+              ) || null
+            }
+            onChange={(_, selectedOption) => {
+              handleCategoryChange(selectedOption);
+            }}
+          />
           <TextField
             label="Pris"
             id="product-price"

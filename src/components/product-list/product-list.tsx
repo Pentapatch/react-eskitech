@@ -91,7 +91,7 @@ export const ProductList = ({
 
   return (
     <div className="w-full my-4">
-      <div className="sticky top-[128px] h-20 px-2 bg-blue-50 flex items-center justify-between">
+      <div className="sticky top-[110px] h-20 px-2 bg-blue-50 flex items-center justify-between z-10">
         <h1 className="pl-2 font-bold text-2xl">Eskitech&apos;s produkter</h1>
         <Autocomplete
           disablePortal

@@ -1,3 +1,4 @@
+import { Categories } from "@root/models/categories/categories";
 import { Product } from "@root/models/products/product";
 import { ProductPost } from "@root/models/products/product-post";
 import { ProductPut } from "@root/models/products/product-put";
@@ -58,6 +59,16 @@ export const deleteProduct = (productId: number) =>
     .delete(`/Products/${productId}`, {
       headers: { "Content-Type": "application/json" },
     })
+    .catch((error) => {
+      throw error;
+    });
+
+export const getCategories = () =>
+  axiosInstance
+    .get<Categories[]>("/Categories", {
+      headers: { "Content-Type": "application/json" },
+    })
+    .then(({ data }) => data)
     .catch((error) => {
       throw error;
     });
