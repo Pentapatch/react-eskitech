@@ -1,7 +1,7 @@
 "use client";
 
 import { Typography } from "@mui/material";
-import { ProductInfoDialog } from "@root/components/product-info-dialog/product-info-dialog";
+import { ProductInfoDialog } from "@root/components/info-dialog/product-info-dialog/product-info-dialog";
 import { ProductList } from "@root/components/product-list/product-list";
 import { useState } from "react";
 

@@ -16,67 +16,65 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { deleteProduct, getProducts } from "@root/api/api";
-import { Products } from "@root/models/products/products";
+import { deleteCategory, getCategories } from "@root/api/api";
+import { Categories } from "@root/models/categories/categories";
 import { useEffect, useState } from "react";
 
-interface ProductListProps {
-  crud?: boolean;
+interface CategoryListProps {
   refresh?: boolean;
-  onProductSelected: (productId: number | null) => void;
-  onCreateProduct?: () => void;
+  onCategorySelected: (productId: number | null) => void;
+  onCreateCategory?: () => void;
 }
 
-export const ProductList = ({
-  crud,
+export const CategoryList = ({
   refresh,
-  onProductSelected,
-  onCreateProduct,
-}: ProductListProps) => {
-  const [products, setProducts] = useState<Products[]>([]);
+  onCategorySelected,
+  onCreateCategory,
+}: CategoryListProps) => {
+  const [categories, setCategories] = useState<Categories[]>([]);
   const [jsonResponse, setJsonResponse] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [showRawData, setShowRawData] = useState<boolean>(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
 
-  const fetchProducts = async () => {
-    getProducts()
+  const fetchCategories = async () => {
+    getCategories()
       .then((data) => {
-        setProducts(data);
+        setCategories(data);
         setJsonResponse(JSON.stringify(data, null, 2));
         setLoading(false);
       })
       .catch((error) => {
         // TODO: Display generic error message to user via a toast or similar
-        console.error("Error fetching products:", error);
+        console.error("Error fetching categories:", error);
       });
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchCategories();
   }, [refresh]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowRawData(event.target.checked);
   };
 
-  const handleCreateProduct = () => {
-    if (onCreateProduct) onCreateProduct();
+  const handleCreateCategory = () => {
+    if (onCreateCategory) onCreateCategory();
   };
 
-  const handleDelete = async (productId: number) => {
+  const handleDelete = async (categoryId: number) => {
     setDeleteInProgress(true);
-    deleteProduct(productId)
+    deleteCategory(categoryId)
       .catch((error) => {
-        console.error("Error deleting product:", error);
+        console.error("Error deleting category:", error);
       })
       .finally(() => {
         setDeleteInProgress(false);
-        fetchProducts();
+        fetchCategories();
       });
   };
 
-  const autocompleteOptions = products.map((product) => ({
+  const autocompleteOptions = categories.map((product) => ({
     label: product.name,
     id: product.id,
   }));
@@ -92,17 +90,17 @@ export const ProductList = ({
   return (
     <div className="w-full my-4">
       <div className="sticky top-[110px] h-20 px-2 bg-blue-50 flex items-center justify-between z-10">
-        <h1 className="pl-2 font-bold text-2xl">Produkter</h1>
+        <h1 className="pl-2 font-bold text-2xl">Kategorier</h1>
         <Autocomplete
           disablePortal
           options={autocompleteOptions}
           sx={{ width: 300 }}
           renderInput={(params) => (
-            <TextField {...params} label="Sök efter produkt" />
+            <TextField {...params} label="Sök efter kategori" />
           )}
-          noOptionsText="Inga produkter hittades"
+          noOptionsText="Inga kategorier hittades"
           onChange={(_, selectedOption) => {
-            onProductSelected(selectedOption?.id || null);
+            onCategorySelected(selectedOption?.id || null);
           }}
         />
         <div className="flex gap-4">
@@ -112,20 +110,18 @@ export const ProductList = ({
           />
           <Button
             variant="outlined"
-            onClick={fetchProducts}
+            onClick={fetchCategories}
             startIcon={<Update />}
           >
             Uppdatera
           </Button>
-          {crud && (
-            <Button
-              variant="contained"
-              onClick={handleCreateProduct}
-              startIcon={<Add />}
-            >
-              Skapa ny produkt
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            onClick={handleCreateCategory}
+            startIcon={<Add />}
+          >
+            Skapa ny kategori
+          </Button>
         </div>
       </div>
       {(showRawData && (
@@ -138,45 +134,33 @@ export const ProductList = ({
             <TableHead>
               <TableRow>
                 <TableCell>Namn</TableCell>
-                <TableCell align="left">Tillverkare</TableCell>
-                <TableCell align="left">Beskrivning</TableCell>
-                <TableCell align="left">Kategori</TableCell>
-                <TableCell align="left">Pris</TableCell>
-                <TableCell align="left">Lagersaldo</TableCell>
-                {crud && <TableCell align="left">Åtgärder</TableCell>}
+                <TableCell align="left">Id</TableCell>
+                <TableCell align="right">Åtgärder</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.map((product, index) => (
+              {categories.map((category, index) => (
                 <TableRow
-                  key={product.name}
+                  key={category.name}
                   sx={{
                     "&:last-child td, &:last-child th": { border: 0 },
                     backgroundColor: index % 2 === 0 ? "#f2f2f2" : "inherit",
                   }}
                 >
                   <TableCell component="th" scope="row">
-                    <a href="#" onClick={() => onProductSelected(product.id)}>
-                      {product.name}
+                    <a href="#" onClick={() => onCategorySelected(category.id)}>
+                      {category.name}
                     </a>
                   </TableCell>
-                  <TableCell align="left">{product.brand}</TableCell>
-                  <TableCell align="left">{product.description}</TableCell>
-                  <TableCell align="left">
-                    {product.category.displayName}
+                  <TableCell align="left">{category.id}</TableCell>
+                  <TableCell align="right">
+                    <Button
+                      color="warning"
+                      onClick={() => handleDelete(category.id)}
+                    >
+                      <Delete />
+                    </Button>
                   </TableCell>
-                  <TableCell align="right">{product.price}</TableCell>
-                  <TableCell align="right">{product.stockQuantity}</TableCell>
-                  {crud && (
-                    <TableCell align="right">
-                      <Button
-                        color="warning"
-                        onClick={() => handleDelete(product.id)}
-                      >
-                        <Delete />
-                      </Button>
-                    </TableCell>
-                  )}
                 </TableRow>
               ))}
             </TableBody>

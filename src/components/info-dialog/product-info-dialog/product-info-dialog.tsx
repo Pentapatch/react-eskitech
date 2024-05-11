@@ -63,7 +63,7 @@ export const ProductInfoDialog = ({
     date ? new Date(date).toUTCString() : "-";
 
   return (
-    <Dialog onClose={handleClose} open={open}>
+    <Dialog onClose={handleClose} open={open} fullWidth>
       <DialogTitle>
         <div className="flex items-center justify-between">
           {(product && "Produktinformation") ||

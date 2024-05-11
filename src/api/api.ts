@@ -1,4 +1,6 @@
 import { Categories } from "@root/models/categories/categories";
+import { CategoryPost } from "@root/models/categories/category-post";
+import { CategoryPut } from "@root/models/categories/category-put";
 import { Product } from "@root/models/products/product";
 import { ProductPost } from "@root/models/products/product-post";
 import { ProductPut } from "@root/models/products/product-put";
@@ -69,6 +71,45 @@ export const getCategories = () =>
       headers: { "Content-Type": "application/json" },
     })
     .then(({ data }) => data)
+    .catch((error) => {
+      throw error;
+    });
+
+export const getCategory = (categoryId: number) =>
+  axiosInstance
+    .get<Categories>(`/Categories/${categoryId}`, {
+      headers: { "Content-Type": "application/json" },
+    })
+    .then(({ data }) => data)
+    .catch((error) => {
+      throw error;
+    });
+
+export const createCategory = (category: CategoryPost) =>
+  axiosInstance
+    .post<CategoryPost>(`/Categories`, category, {
+      headers: { "Content-Type": "application/json" },
+    })
+    .then(({ data }) => data)
+    .catch((error) => {
+      throw error;
+    });
+
+export const updateCategory = (categoryId: number, category: CategoryPut) =>
+  axiosInstance
+    .put<CategoryPut>(`/Categories/${categoryId}`, category, {
+      headers: { "Content-Type": "application/json" },
+    })
+    .then(({ data }) => data)
+    .catch((error) => {
+      throw error;
+    });
+
+export const deleteCategory = (categoryId: number) =>
+  axiosInstance
+    .delete(`/Categories/${categoryId}`, {
+      headers: { "Content-Type": "application/json" },
+    })
     .catch((error) => {
       throw error;
     });
