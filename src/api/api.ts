@@ -1,6 +1,7 @@
 import { Categories } from "@root/models/categories/categories";
 import { CategoryPost } from "@root/models/categories/category-post";
 import { CategoryPut } from "@root/models/categories/category-put";
+import { PagedResponse } from "@root/models/pagination/paged-response";
 import { Product } from "@root/models/products/product";
 import { ProductPost } from "@root/models/products/product-post";
 import { ProductPut } from "@root/models/products/product-put";
@@ -20,6 +21,17 @@ export const getProducts = () =>
   axiosInstance
     .get<Products[]>("/Products", {
       headers: { "Content-Type": "application/json" },
+    })
+    .then(({ data }) => data)
+    .catch((error) => {
+      throw error;
+    });
+
+export const getProductsPaginated = (page: number, pageSize: number) =>
+  axiosInstance
+    .get<PagedResponse<Product>>("/Products/paged", {
+      headers: { "Content-Type": "application/json" },
+      params: { page, pageSize },
     })
     .then(({ data }) => data)
     .catch((error) => {
@@ -69,6 +81,17 @@ export const getCategories = () =>
   axiosInstance
     .get<Categories[]>("/Categories", {
       headers: { "Content-Type": "application/json" },
+    })
+    .then(({ data }) => data)
+    .catch((error) => {
+      throw error;
+    });
+
+export const getCategoriesPaginated = (page: number, pageSize: number) =>
+  axiosInstance
+    .get<PagedResponse<Categories>>("/Categories/paged", {
+      headers: { "Content-Type": "application/json" },
+      params: { page, pageSize },
     })
     .then(({ data }) => data)
     .catch((error) => {

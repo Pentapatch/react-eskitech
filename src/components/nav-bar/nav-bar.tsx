@@ -6,7 +6,7 @@ export const NavBar = () => {
       <nav className="flex justify-center items-center gap-4">
         <Link href="/">Externt API</Link>
         <Link href="/internal-crud">CRUD (internt)</Link>
-        <Link href="#">Om showcase</Link>
+        <Link href="/about">Om showcase</Link>
       </nav>
     </div>
   );

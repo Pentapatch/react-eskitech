@@ -6,6 +6,7 @@ import {
   Button,
   CircularProgress,
   FormControlLabel,
+  Pagination,
   Paper,
   Switch,
   Table,
@@ -16,7 +17,11 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { deleteProduct, getProducts } from "@root/api/api";
+import {
+  deleteProduct,
+  getProducts,
+  getProductsPaginated,
+} from "@root/api/api";
 import { Products } from "@root/models/products/products";
 import { useEffect, useState } from "react";
 
@@ -38,6 +43,10 @@ export const ProductList = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [showRawData, setShowRawData] = useState<boolean>(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(10);
+
+  const pageSize = 10;
 
   const fetchProducts = async () => {
     getProducts()
@@ -52,9 +61,26 @@ export const ProductList = ({
       });
   };
 
+  const fetchProductsPaginated = async (page: number, size: number) => {
+    getProductsPaginated(page, size)
+      .then((data) => {
+        console.log("data", data);
+        setProducts(data.data);
+        setPage(data.page);
+        setTotalCount(data.totalCount);
+        setJsonResponse(JSON.stringify(data, null, 2));
+        setLoading(false);
+      })
+      .catch((error) => {
+        // TODO: Display generic error message to user via a toast or similar
+        console.error("Error fetching products:", error);
+      });
+  };
+
   useEffect(() => {
-    fetchProducts();
-  }, [refresh]);
+    if (!crud) fetchProducts();
+    else fetchProductsPaginated(page, pageSize);
+  }, [refresh, crud, page]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowRawData(event.target.checked);
@@ -91,14 +117,14 @@ export const ProductList = ({
 
   return (
     <div className="w-full my-4">
-      <div className="sticky top-[110px] h-20 px-2 bg-blue-50 flex items-center justify-between z-10">
+      <div className="sticky top-[110px] h-20 px-2 bg-blue-50 flex items-center justify-between z-10 shadow-sm">
         <h1 className="pl-2 font-bold text-2xl">Produkter</h1>
         <Autocomplete
           disablePortal
           options={autocompleteOptions}
           sx={{ width: 300 }}
           renderInput={(params) => (
-            <TextField {...params} label="Sök efter produkt" />
+            <TextField {...params} label="Sök i listan" />
           )}
           noOptionsText="Inga produkter hittades"
           onChange={(_, selectedOption) => {
@@ -172,8 +198,13 @@ export const ProductList = ({
                       <Button
                         color="warning"
                         onClick={() => handleDelete(product.id)}
+                        disabled={deleteInProgress}
                       >
-                        <Delete />
+                        {deleteInProgress ? (
+                          <CircularProgress size={24} />
+                        ) : (
+                          <Delete />
+                        )}
                       </Button>
                     </TableCell>
                   )}
@@ -181,6 +212,14 @@ export const ProductList = ({
               ))}
             </TableBody>
           </Table>
+          {crud && (
+            <Pagination
+              count={Math.ceil(totalCount / pageSize)}
+              page={page}
+              onChange={(_, newPage) => setPage(newPage)}
+              className="py-4"
+            />
+          )}
         </TableContainer>
       )}
     </div>
