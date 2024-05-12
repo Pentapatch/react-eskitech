@@ -102,6 +102,11 @@ export const ProductList = ({
       });
   };
 
+  const handleRefresh = () => {
+    if (!crud) fetchProducts();
+    else fetchProductsPaginated(page, pageSize);
+  };
+
   const autocompleteOptions = products.map((product) => ({
     label: product.name,
     id: product.id,
@@ -138,7 +143,7 @@ export const ProductList = ({
           />
           <Button
             variant="outlined"
-            onClick={fetchProducts}
+            onClick={handleRefresh}
             startIcon={<Update />}
           >
             Uppdatera
