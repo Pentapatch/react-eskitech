@@ -5,6 +5,7 @@ export interface Product {
   productId: string;
   name: string;
   description: string;
+  longDescription: string;
   brand: string;
   category: Lookup;
   price: number;
