@@ -96,6 +96,12 @@ export const ProductInfoDialog = ({
             />
           </ListItem>
           <ListItem>
+            <ListItemText
+              primary="Lång beskrivning"
+              secondary={product.longDescription}
+            />
+          </ListItem>
+          <ListItem>
             <ListItemText primary="Tillverkare" secondary={product.brand} />
           </ListItem>
           <ListItem>

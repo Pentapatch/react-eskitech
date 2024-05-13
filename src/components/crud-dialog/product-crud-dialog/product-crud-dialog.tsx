@@ -232,6 +232,16 @@ export const ProductCrudDialog = ({
             fullWidth
           />
           <TextField
+            label="Lång beskrivning"
+            id="product-long-description"
+            name="longDescription"
+            value={editedProduct?.longDescription || ""}
+            onChange={handleInputChange}
+            disabled={requestInProgress}
+            multiline
+            fullWidth
+          />
+          <TextField
             label="Tillverkare"
             id="product-brand"
             name="brand"
